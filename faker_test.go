@@ -292,6 +292,8 @@ type Foo struct {
 	Note   byte
 	Count  int
 	Data   string
+	Name   string `faker:"name"`
+	Email  string `faker:"email"`
 }
 
 func TestFakerStruct(t *testing.T) {
@@ -300,27 +302,35 @@ func TestFakerStruct(t *testing.T) {
 	x_answers := []Foo{
 		{
 			Switch: false,
-			Note:   62,
+			Note:   0x3e,
 			Count:  4308690457412179793,
 			Data:   "\x12\xe9\x03\xd3\b\xde\xca!X\xad2\xe1C\xd2c",
-		},
-		{
-			Switch: true,
-			Note:   0x12,
-			Count:  5521202747878656476,
-			Data:   "F(\x85s04Z\x9d0\x03x",
+			Name:   "qmovuevpwmarmton",
+			Email:  "+sybffjyb.gqjfww@tie.film",
 		},
 		{
 			Switch: false,
-			Note:   0x24,
-			Count:  950400323440343118,
-			Data:   "\xf1\xf7\xbb= \xbbq\x94\x88\x83]$",
+			Note:   0x16,
+			Count:  6882849783541559690,
+			Data:   "tP\u007fV\xa9+K\xe3_O\x8b\x18",
+			Name:   "svnmjzimphhjuntx",
+			Email:  "gdlbfa.gdgj_dh.c@yhd.taipei",
+		},
+		{
+			Switch: false,
+			Note:   0xc1,
+			Count:  2654595716993425044,
+			Data:   "\xbf\xa4\x8a\x82\xae\xae\x84\xae̚~\x06\x8f",
+			Name:   "nqqqxocnvskwqpxh",
+			Email:  "n_yeshp+ry_-h.oq@prl.संगठन",
 		},
 		{
 			Switch: true,
-			Note:   0xb1,
-			Count:  3967212276624460248,
-			Data:   "\xe9\xdb\x16\x8a",
+			Note:   0xd6,
+			Count:  4883506937319508494,
+			Data:   "ߚ\xb5=xG",
+			Name:   "grxpigcgvofcwapr",
+			Email:  "v+.yjtelamqobzge@hcm.reisen",
 		},
 	}
 
