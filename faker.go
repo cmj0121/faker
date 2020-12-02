@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	FAKE_MAX_CAP = 32
+	FAKE_MAX_SIZE = 16
 )
 
 var (
@@ -41,14 +41,30 @@ func fake(value reflect.Value) (err error) {
 	case reflect.Float64, reflect.Float32:
 		value.SetFloat(generator.Float64())
 	case reflect.String:
-		size := int(generator.Int63() % FAKE_MAX_CAP)
+		size := int(generator.Int63() % FAKE_MAX_SIZE)
 		data := fakeBytes(size, nil)
 		value.SetString(string(data))
 	case reflect.Slice, reflect.Array:
-		for idx := 0; idx < value.Len(); idx++ {
-			if err = fake(value.Index(idx)); err != nil {
-				err = fmt.Errorf("cannot set #%d on %v: %v", idx, value.Type(), err)
-				return
+		size := value.Len()
+		if size == 0 {
+			// override the len to FAKE_MAX_SIZE
+			size = FAKE_MAX_SIZE
+		}
+
+		for idx := 0; idx < size; idx++ {
+			switch {
+			case idx < value.Len():
+				if err = fake(value.Index(idx)); err != nil {
+					err = fmt.Errorf("cannot set #%d on %v: %v", idx, value.Type(), err)
+					return
+				}
+			default:
+				val := reflect.New(value.Type().Elem())
+				if err = fake(val.Elem()); err != nil {
+					err = fmt.Errorf("cannot set new instance %v: %v", val.Type(), err)
+					return
+				}
+				value.Set(reflect.Append(value, val.Elem()))
 			}
 		}
 		return
