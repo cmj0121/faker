@@ -3,11 +3,13 @@ package faker
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 )
 
 const (
 	FAKE_MAX_SIZE = 16
+	FAKE_IGNORE   = "-"
 )
 
 var (
@@ -34,6 +36,8 @@ func Fake(in interface{}) (err error) {
 
 func fake(value reflect.Value) (err error) {
 	switch kind := value.Kind(); kind {
+	case reflect.Bool:
+		value.SetBool(generator.Int63()%2 == 0)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		value.SetInt(generator.Int63())
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
@@ -68,6 +72,19 @@ func fake(value reflect.Value) (err error) {
 			}
 		}
 		return
+	case reflect.Struct:
+		for idx := 0; idx < value.NumField(); idx++ {
+			field := value.Field(idx)
+
+			tags := value.Type().Field(idx).Tag
+			if field.IsValid() && field.CanSet() {
+				switch {
+				case strings.TrimSpace(string(tags)) == FAKE_IGNORE:
+				default:
+					fake(field)
+				}
+			}
+		}
 	default:
 		err = fmt.Errorf("cannot set fake for reflect.Kind: %v", kind)
 		return

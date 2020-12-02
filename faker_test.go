@@ -6,6 +6,66 @@ import (
 	"testing"
 )
 
+func TestFakerBool(t *testing.T) {
+	var x bool
+	x_answers := []bool{
+		false,
+		true,
+		false,
+		true,
+		true,
+	}
+
+	Seed(0)
+	for _, ans := range x_answers {
+		if err := Fake(&x); err != nil {
+			t.Fatalf("cannot set faker to %T: %v", x, err)
+		} else if x != ans {
+			t.Fatalf("fake %v <> %v", x, ans)
+		}
+	}
+}
+
+func TestFakerByte(t *testing.T) {
+	var x byte
+	x_answers := []byte{
+		1,
+		192,
+		115,
+		98,
+		74,
+	}
+
+	Seed(0)
+	for _, ans := range x_answers {
+		if err := Fake(&x); err != nil {
+			t.Fatalf("cannot set faker to %T: %v", x, err)
+		} else if x != ans {
+			t.Fatalf("fake %v <> %v", x, ans)
+		}
+	}
+}
+
+func TestFakerRune(t *testing.T) {
+	var x rune
+	x_answers := []rune{
+		-1023568895,
+		-2932288,
+		1332660339,
+		-387013278,
+		1963666762,
+	}
+
+	Seed(0)
+	for _, ans := range x_answers {
+		if err := Fake(&x); err != nil {
+			t.Fatalf("cannot set faker to %T: %v", x, err)
+		} else if x != ans {
+			t.Fatalf("fake %v <> %v", x, ans)
+		}
+	}
+}
+
 func TestFakerInt(t *testing.T) {
 	var x int
 	x_answers := []int{
@@ -220,4 +280,56 @@ func BenchmarkFakeSlice(b *testing.B) {
 			Fake(&x)
 		}
 	})
+}
+
+type Foo struct {
+	ignore    bool
+	_         [8]byte
+	Ignore    byte `-`
+	IgnoreTag byte ` - `
+
+	Switch bool
+	Note   byte
+	Count  int
+	Data   string
+}
+
+func TestFakerStruct(t *testing.T) {
+	var x Foo
+
+	x_answers := []Foo{
+		{
+			Switch: false,
+			Note:   62,
+			Count:  4308690457412179793,
+			Data:   "\x12\xe9\x03\xd3\b\xde\xca!X\xad2\xe1C\xd2c",
+		},
+		{
+			Switch: true,
+			Note:   0x12,
+			Count:  5521202747878656476,
+			Data:   "F(\x85s04Z\x9d0\x03x",
+		},
+		{
+			Switch: false,
+			Note:   0x24,
+			Count:  950400323440343118,
+			Data:   "\xf1\xf7\xbb= \xbbq\x94\x88\x83]$",
+		},
+		{
+			Switch: true,
+			Note:   0xb1,
+			Count:  3967212276624460248,
+			Data:   "\xe9\xdb\x16\x8a",
+		},
+	}
+
+	rand.Seed(0)
+	for _, ans := range x_answers {
+		if err := Fake(&x); err != nil {
+			t.Fatalf("cannot set faker to %T: %v", x, err)
+		} else if !reflect.DeepEqual(x, ans) {
+			t.Fatalf("fake %#v <> %#v", x, ans)
+		}
+	}
 }
