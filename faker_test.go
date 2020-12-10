@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+/* ---- general type ---- */
 func TestFakerBool(t *testing.T) {
 	var x bool
 	x_answers := []bool{
@@ -216,6 +217,7 @@ func TestFakerSlice(t *testing.T) {
 	}
 }
 
+/* ---- benchmark ---- */
 func BenchmarkFakeInt(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var x int
@@ -282,6 +284,7 @@ func BenchmarkFakeSlice(b *testing.B) {
 	})
 }
 
+/* ---- pass structure ---- */
 type Foo struct {
 	ignore    bool
 	_         [8]byte
@@ -342,4 +345,15 @@ func TestFakerStruct(t *testing.T) {
 			t.Fatalf("fake %#v <> %#v", x, ans)
 		}
 	}
+}
+
+func BenchmarkFakeStruct(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		var foo Foo
+
+		for pb.Next() {
+			// generate the fake int
+			Fake(&foo)
+		}
+	})
 }

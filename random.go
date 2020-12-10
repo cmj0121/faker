@@ -16,7 +16,11 @@ var generator Random
 
 func init() {
 	// set the default random generator
-	generator = rand.New(rand.NewSource(0))
+	SetGenerator(rand.New(rand.NewSource(0)))
+}
+
+func SetGenerator(random Random) {
+	generator = random
 	now := time.Now().UnixNano()
 	generator.Seed(now)
 	generator.Seed(generator.Int63())
