@@ -16,7 +16,7 @@ jobs:
       - name: linter and test
         run: |-
           gofmt -e -s $(find . -name '*.go')
-          go test -race -cover -failfast -timeout 2s ./...
+          go test -race -cover -failfast -timeout 2s
       - name: benchmark
         run: |-
           go test -bench=. -cover -failfast -benchmem
@@ -30,7 +30,7 @@ jobs:
       - name: linter and test
         run: |-
           gofmt -e -s $(find . -name '*.go')
-          go test -race -cover -failfast -timeout 2s ./...
+          go test -race -cover -failfast -timeout 2s
       - name: benchmark
         run: |-
           go test -bench=. -cover -failfast -benchmem

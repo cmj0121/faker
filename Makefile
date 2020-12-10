@@ -18,7 +18,7 @@ GOBENCH := $(GO) test -bench=. -cover -failfast -benchmem
 
 linter:
 	$(GOFMT) $(shell find . -name '*.go')
-	$(GOTEST) ./...
+	$(GOTEST)
 	$(GOBENCH)
 
 $(BIN): linter
