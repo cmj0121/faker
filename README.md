@@ -1,4 +1,5 @@
 # Faker #
+![GitHub Action](https://github.com/cmj0121/faker/workflows/ci/badge.svg)
 The structure-based faker data generator.
 
 ## Basic ##

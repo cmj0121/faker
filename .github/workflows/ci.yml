@@ -1,0 +1,36 @@
+# Run Test
+name: ci
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  compliance-ubuntu:
+    name: compliance
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-go@v2
+      - name: linter and test
+        run: |-
+          gofmt -e -s $(find . -name '*.go')
+          go test -race -cover -failfast -timeout 2s ./...
+      - name: benchmark
+        run: |-
+          go test -bench=. -cover -failfast -benchmem
+  compliance-mac-os:
+    name: compliance
+    runs-on: macos-11.0
+
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-go@v2
+      - name: linter and test
+        run: |-
+          gofmt -e -s $(find . -name '*.go')
+          go test -race -cover -failfast -timeout 2s ./...
+      - name: benchmark
+        run: |-
+          go test -bench=. -cover -failfast -benchmem
