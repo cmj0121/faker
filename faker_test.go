@@ -244,3 +244,15 @@ func BenchmarkFakeComplex(b *testing.B) {
 		}
 	})
 }
+
+func BenchmarkCryptoRandomFakeInt(b *testing.B) {
+	SetGenerator(CryptoRandom{})
+	b.RunParallel(func(pb *testing.PB) {
+		var x int
+
+		for pb.Next() {
+			// generate the fake int
+			MustFake(&x)
+		}
+	})
+}
