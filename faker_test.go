@@ -178,6 +178,26 @@ func TestFakerComplex(t *testing.T) {
 	}
 }
 
+func TestFakerArray(t *testing.T) {
+	var x [3]int8
+	x_answers := [][3]int8{
+		{1, -64, 115},
+		{98, 74, -81},
+		{57, 120, 81},
+		{78, -8, 68},
+		{59, -78, -88},
+	}
+
+	Seed(0)
+	for _, ans := range x_answers {
+		if err := Fake(&x); err != nil {
+			t.Fatalf("cannot set faker to %T: %v", x, err)
+		} else if x != ans {
+			t.Fatalf("fake %v <> %v", x, ans)
+		}
+	}
+}
+
 /* ---- benchmark ---- */
 func BenchmarkFakeBool(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
@@ -237,6 +257,17 @@ func BenchmarkFakeFloat(b *testing.B) {
 func BenchmarkFakeComplex(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var x complex128
+
+		for pb.Next() {
+			// generate the fake int
+			MustFake(&x)
+		}
+	})
+}
+
+func BenchmarkFakeArray(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		var x [16]int
 
 		for pb.Next() {
 			// generate the fake int

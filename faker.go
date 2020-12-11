@@ -58,6 +58,13 @@ func fake(value reflect.Value) (err error) {
 		// set random complex128 (may truncated)
 		c := complex(generator.Float64(), generator.Float64())
 		value.SetComplex(c)
+	case reflect.Array:
+		for idx := 0; idx < value.Cap(); idx++ {
+			if err = fake(value.Index(idx)); err != nil {
+				err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
+				return
+			}
+		}
 	default:
 		err = fmt.Errorf("cannot set fake for reflect.Kind: %v", kind)
 		return
