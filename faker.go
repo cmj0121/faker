@@ -37,13 +37,21 @@ func Fake(in interface{}) (err error) {
 func fake(value reflect.Value) (err error) {
 	switch kind := value.Kind(); kind {
 	case reflect.Bool:
+		// set the random boolean value
 		value.SetBool(generator.Int63()%2 == 0)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		// set the random int64 (may truncated)
 		value.SetInt(generator.Int63())
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		// set the random uint64 (may truncated)
 		value.SetUint(uint64(generator.Int63()))
 	case reflect.Float64, reflect.Float32:
+		// set the random float64 (may truncated)
 		value.SetFloat(generator.Float64())
+	case reflect.Complex64, reflect.Complex128:
+		// set random complex128 (may truncated)
+		c := complex(generator.Float64(), generator.Float64())
+		value.SetComplex(c)
 	case reflect.String:
 		size := int(generator.Int63() % FAKE_MAX_SIZE)
 		data := fakeBytes(size, nil)

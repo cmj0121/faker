@@ -141,6 +141,44 @@ func TestFakerFloat(t *testing.T) {
 	}
 }
 
+func TestFakerComplex(t *testing.T) {
+	var x complex128
+	x_answers := []complex128{
+		0.9451961492941164 + 0.24496508529377975i,
+		0.6559562651954052 + 0.05434383959970039i,
+		0.36758720663245853 + 0.2894804331565928i,
+		0.19243860967493215 + 0.6553321508148324i,
+		0.897169713149801 + 0.16735444255905835i,
+	}
+
+	Seed(0)
+	for _, ans := range x_answers {
+		if err := Fake(&x); err != nil {
+			t.Fatalf("cannot set faker to %T: %v", x, err)
+		} else if x != ans {
+			t.Fatalf("fake %v <> %v", x, ans)
+		}
+	}
+
+	var y complex64
+	y_answers := []complex64{
+		0.94519615 + 0.24496509i,
+		0.65595627 + 0.05434384i,
+		0.3675872 + 0.28948045i,
+		0.1924386 + 0.65533215i,
+		0.8971697 + 0.16735445i,
+	}
+
+	Seed(0)
+	for _, ans := range y_answers {
+		if err := Fake(&y); err != nil {
+			t.Fatalf("cannot set faker to %T: %v", y, err)
+		} else if y != ans {
+			t.Fatalf("fake %v <> %v", y, ans)
+		}
+	}
+}
+
 func TestFakerString(t *testing.T) {
 	var x string
 	x_answers := []string{
