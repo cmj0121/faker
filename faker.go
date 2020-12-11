@@ -3,7 +3,6 @@ package faker
 import (
 	"fmt"
 	"reflect"
-	"strings"
 	"sync"
 )
 
@@ -11,6 +10,13 @@ var (
 	// global lock for the faker which may pass the same instance
 	fake_lock = sync.Mutex{}
 )
+
+// run must- prefix and raise panic when error happened
+func MustFake(in interface{}) {
+	if err := Fake(in); err != nil {
+		panic(err)
+	}
+}
 
 // fake the input instance, should pass the reference
 func Fake(in interface{}) (err error) {
@@ -52,74 +58,9 @@ func fake(value reflect.Value) (err error) {
 		// set random complex128 (may truncated)
 		c := complex(generator.Float64(), generator.Float64())
 		value.SetComplex(c)
-	case reflect.String:
-		size := int(generator.Int63() % FAKE_MAX_SIZE)
-		data := fakeBytes(size, nil)
-		value.SetString(string(data))
-	case reflect.Slice, reflect.Array:
-		size := value.Len()
-		if size == 0 {
-			// override the len to FAKE_MAX_SIZE
-			size = FAKE_MAX_SIZE
-		}
-
-		for idx := 0; idx < size; idx++ {
-			switch {
-			case idx < value.Len():
-				if err = fake(value.Index(idx)); err != nil {
-					err = fmt.Errorf("cannot set #%d on %v: %v", idx, value.Type(), err)
-					return
-				}
-			default:
-				val := reflect.New(value.Type().Elem())
-				if err = fake(val.Elem()); err != nil {
-					err = fmt.Errorf("cannot set new instance %v: %v", val.Type(), err)
-					return
-				}
-				value.Set(reflect.Append(value, val.Elem()))
-			}
-		}
-		return
-	case reflect.Struct:
-		for idx := 0; idx < value.NumField(); idx++ {
-			field := value.Field(idx)
-
-			tags := value.Type().Field(idx).Tag
-			if field.IsValid() && field.CanSet() {
-				switch {
-				case strings.TrimSpace(string(tags)) == FAKE_IGNORE:
-				case tags.Get(FAKE_KEY) == FAKE_VALUE_NAME && field.Kind() == reflect.String:
-					name := string(fakeBytes(FAKE_MAX_SIZE, FAKE_NAME_POOL))
-					strings.ToTitle(name)
-					field.SetString(name)
-				case tags.Get(FAKE_KEY) == FAKE_VALUE_EMAIL && field.Kind() == reflect.String:
-					email := string(fakeBytes(FAKE_MAX_SIZE, FAKE_EMAIL_POOL))
-					email += "@" + string(fakeBytes(3, FAKE_NAME_POOL)) + "."
-					email += FAKE_DOMAIN_POOL[int(generator.Int63())%len(FAKE_DOMAIN_POOL)]
-					field.SetString(email)
-				default:
-					fake(field)
-				}
-			}
-		}
 	default:
 		err = fmt.Errorf("cannot set fake for reflect.Kind: %v", kind)
 		return
-	}
-
-	return
-}
-
-func fakeBytes(size int, pool []byte) (out []byte) {
-	switch l := int64(len(pool)); l {
-	case 0:
-		for idx := 0; idx < size; idx++ {
-			out = append(out, byte(generator.Int63()))
-		}
-	default:
-		for idx := 0; idx < size; idx++ {
-			out = append(out, pool[generator.Int63()%l])
-		}
 	}
 
 	return
