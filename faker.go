@@ -65,6 +65,24 @@ func fake(value reflect.Value) (err error) {
 				return
 			}
 		}
+	case reflect.Slice:
+		length := int(generator.Int63() % FAKE_DEFAULT_LEN)
+		for idx := 0; idx < length; idx++ {
+			switch {
+			case idx < value.Len():
+				if err = fake(value.Index(idx)); err != nil {
+					err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
+					return
+				}
+			default:
+				val := reflect.New(value.Type().Elem())
+				if err = fake(val.Elem()); err != nil {
+					err = fmt.Errorf("cannot set new instance %v: %v", val.Type(), err)
+					return
+				}
+				value.Set(reflect.Append(value, val.Elem()))
+			}
+		}
 	default:
 		err = fmt.Errorf("cannot set fake for reflect.Kind: %v", kind)
 		return

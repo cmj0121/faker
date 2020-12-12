@@ -1,7 +1,11 @@
 package faker
 
+const (
+	FAKE_DEFAULT_LEN = 16
+)
+
 var (
-	FAKE_NAME_POOL   = []string{
+	FAKE_NAME_POOL = []string{
 		"john",
 		"cindy",
 		"きんだいち",
