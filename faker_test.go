@@ -238,6 +238,26 @@ func TestFakerSlice(t *testing.T) {
 	}
 }
 
+func TestFakerString(t *testing.T) {
+	var x string
+	x_answers := []string{
+		"\xc0",
+		"bJ\xaf",
+		"xQN\xf8D;\xb2\xa8Y",
+		"_\xc3\xccj\xf2mZ",
+		" \x92o\x04k\xaaf쑥",
+	}
+
+	Seed(0)
+	for _, ans := range x_answers {
+		if err := Fake(&x); err != nil {
+			t.Fatalf("cannot set faker to %T: %v", x, err)
+		} else if !reflect.DeepEqual(x, ans) {
+			t.Fatalf("fake %#v <> %#v", x, ans)
+		}
+	}
+}
+
 /* ---- benchmark ---- */
 func BenchmarkFakeBool(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
@@ -308,6 +328,28 @@ func BenchmarkFakeComplex(b *testing.B) {
 func BenchmarkFakeArray(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var x [16]int
+
+		for pb.Next() {
+			// generate the fake int
+			MustFake(&x)
+		}
+	})
+}
+
+func BenchmarkFakeSlice(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		var x []int
+
+		for pb.Next() {
+			// generate the fake int
+			MustFake(&x)
+		}
+	})
+}
+
+func BenchmarkFakeString(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		var x string
 
 		for pb.Next() {
 			// generate the fake int

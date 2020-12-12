@@ -83,6 +83,15 @@ func fake(value reflect.Value) (err error) {
 				value.Set(reflect.Append(value, val.Elem()))
 			}
 		}
+	case reflect.String:
+		length := int(generator.Int63() % FAKE_DEFAULT_LEN)
+		str := make([]byte, length)
+
+		for idx := 0; idx < length; idx++ {
+			// save the data to the string
+			str[idx] = byte(generator.Int63())
+		}
+		value.SetString(string(str))
 	default:
 		err = fmt.Errorf("cannot set fake for reflect.Kind: %v", kind)
 		return
