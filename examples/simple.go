@@ -9,7 +9,7 @@ import (
 type Simple struct {
 	Ignore []byte `-`
 	Count  int
-	Data   string
+	Data   []byte `fake_size:"8"`
 }
 
 func main() {

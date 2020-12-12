@@ -8,10 +8,12 @@ import (
 
 type Foo struct {
 	ignore bool
+	Ignore bool `-`
 
 	Toggle bool
 	Count  int8
 	Buff   []rune
+	FixBuf []uint8 `fake_size:"4"`
 	Name   string
 }
 
@@ -268,10 +270,14 @@ func TestFakerString(t *testing.T) {
 }
 
 func TestFakeStruct(t *testing.T) {
-	var x Foo
+	x := Foo{
+		Ignore: true,
+	}
+
 	x_answers := []Foo{
 		{
 			ignore: false,
+			Ignore: true,
 			Toggle: false,
 			Count:  -64,
 			Buff: []rune{
@@ -279,10 +285,17 @@ func TestFakeStruct(t *testing.T) {
 				1963666762,
 				-1633204049,
 			},
-			Name: "xQN\xf8D;\xb2\xa8Y",
+			FixBuf: []uint8{
+				0x78,
+				0x51,
+				0x4e,
+				0xf8,
+			},
+			Name: ";\xb2\xa8Y",
 		},
 		{
 			ignore: false,
+			Ignore: true,
 			Toggle: false,
 			Count:  95,
 			Buff: []rune{
@@ -290,58 +303,100 @@ func TestFakeStruct(t *testing.T) {
 				1464508266,
 				1403442418,
 			},
-			Name: "Z\xaa \x92o\x04k\xaaf쑥\xa2",
-		},
-		{
-			ignore: false,
-			Toggle: false,
-			Count:  67,
-			Buff: []rune{
-				1258210498,
-				-1650781734,
-				601334336,
+			FixBuf: []uint8{
+				0x5a,
+				0xaa,
+				0x20,
+				0x92,
 			},
-			Name: "\xfe\xd6\x1e\xc1\\\xf7\x93\xed\x10:",
+			Name: "\x04k\xaaf쑥\xa2yC#\xc2\xda@Z",
 		},
 		{
 			ignore: false,
-			Toggle: false,
-			Count:  -64,
+			Ignore: true,
+			Toggle: true,
+			Count:  -42,
 			Buff: []rune{
+				978076865,
+				-75543972,
+				-1942229513,
+				1844508819,
+				410748141,
+				-1001655280,
+				-2113532614,
+				1091696727,
+				-1048164928,
+				1434487596,
 				622675078,
 				1267322266,
 				-1768035344,
 				-1102168983,
-				1803868599,
-				-631472459,
-				383160680,
-				1630844983,
-				-1895813982,
-				-464882862,
-				-2090873478,
-				-1251534800,
 			},
-			Name: "w\xe5",
+			FixBuf: []uint8{
+				0xb5,
+				0x68,
+				0x37,
+				0xa2,
+			},
+			Name: "z0",
 		},
 		{
 			ignore: false,
+			Ignore: true,
 			Toggle: true,
-			Count:  77,
+			Count:  119,
 			Buff: []rune{
+				-1141436326,
+				658332749,
+				1647500230,
 				-644367117,
 				-2098795211,
-				-82730767,
-				9496571,
-				58169065,
-				2134930079,
-				383160680,
-				1630844983,
-				-1895813982,
-				-464882862,
-				-2090873478,
-				-1251534800,
+				-1001655280,
+				-2113532614,
+				1091696727,
+				-1048164928,
+				1434487596,
+				622675078,
+				1267322266,
+				-1768035344,
+				-1102168983,
 			},
-			Name: ">Q\u007f\x12\xe9\x03\xd3\b\xde\xca!X\xad",
+			FixBuf: []uint8{
+				0xfb,
+				0xe9,
+				0x9f,
+				0xfd,
+			},
+			Name: "Q\u007f\x12\xe9\x03\xd3\b\xde\xca!X\xad2\xe1",
+		},
+		{
+			ignore: false,
+			Ignore: true,
+			Toggle: false,
+			Count:  -46,
+			Buff: []rune{
+				932970838,
+				-821465838,
+				-2009609764,
+				-644367117,
+				-2098795211,
+				-1001655280,
+				-2113532614,
+				1091696727,
+				-1048164928,
+				1434487596,
+				622675078,
+				1267322266,
+				-1768035344,
+				-1102168983,
+			},
+			FixBuf: []uint8{
+				0x46,
+				0x28,
+				0x85,
+				0x73,
+			},
+			Name: "",
 		},
 	}
 
@@ -447,6 +502,17 @@ func BenchmarkFakeSlice(b *testing.B) {
 func BenchmarkFakeString(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		var x string
+
+		for pb.Next() {
+			// generate the fake int
+			MustFake(&x)
+		}
+	})
+}
+
+func BenchmarkFakeStruct(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		var x Foo
 
 		for pb.Next() {
 			// generate the fake int

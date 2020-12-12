@@ -3,6 +3,8 @@ package faker
 import (
 	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -36,11 +38,11 @@ func Fake(in interface{}) (err error) {
 		return
 	}
 
-	err = fake(value.Elem())
+	err = fake(value.Elem(), 0)
 	return
 }
 
-func fake(value reflect.Value) (err error) {
+func fake(value reflect.Value, size int) (err error) {
 	switch kind := value.Kind(); kind {
 	case reflect.Bool:
 		// set the random boolean value
@@ -60,23 +62,28 @@ func fake(value reflect.Value) (err error) {
 		value.SetComplex(c)
 	case reflect.Array:
 		for idx := 0; idx < value.Cap(); idx++ {
-			if err = fake(value.Index(idx)); err != nil {
+			if err = fake(value.Index(idx), 0); err != nil {
 				err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 				return
 			}
 		}
 	case reflect.Slice:
-		length := int(generator.Int63() % FAKE_DEFAULT_LEN)
+		length := int(generator.Int63() % FAKE_MAX_SLICE_LEN)
+		if size > 0 {
+			// override the length
+			length = size
+		}
+
 		for idx := 0; idx < length; idx++ {
 			switch {
 			case idx < value.Len():
-				if err = fake(value.Index(idx)); err != nil {
+				if err = fake(value.Index(idx), 0); err != nil {
 					err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 					return
 				}
 			default:
 				val := reflect.New(value.Type().Elem())
-				if err = fake(val.Elem()); err != nil {
+				if err = fake(val.Elem(), 0); err != nil {
 					err = fmt.Errorf("cannot set new instance %v: %v", val.Type(), err)
 					return
 				}
@@ -84,7 +91,11 @@ func fake(value reflect.Value) (err error) {
 			}
 		}
 	case reflect.String:
-		length := int(generator.Int63() % FAKE_DEFAULT_LEN)
+		length := int(generator.Int63() % FAKE_MAX_SLICE_LEN)
+		if size > 0 {
+			// override the length
+			length = size
+		}
 		str := make([]byte, length)
 
 		for idx := 0; idx < length; idx++ {
@@ -96,8 +107,24 @@ func fake(value reflect.Value) (err error) {
 		for idx := 0; idx < value.NumField(); idx++ {
 			if field := value.Field(idx); field.IsValid() && field.CanSet() {
 				// the field now is valid and can set
+				tags := value.Type().Field(idx).Tag
+				size = 0
+
+				if strings.TrimSpace(string(tags)) == FAKE_TAG_IGNORE {
+					// ignore the tag
+					continue
+				}
+
+				if s := tags.Get(FAKE_TAG_SLICE_SIZE); s != "" {
+					if size, err = strconv.Atoi(s); err != nil {
+						// cannot convert to int
+						err = fmt.Errorf("invalid %v: %v", s, err)
+						return
+					}
+				}
+
 				// set by each field
-				if err = fake(field); err != nil {
+				if err = fake(field, size); err != nil {
 					// cannot set field on structure
 					return
 				}

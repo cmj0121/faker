@@ -11,7 +11,11 @@ const (
 )
 
 const (
-	FAKE_DEFAULT_LEN = 16
+	// the default slice max size
+	FAKE_MAX_SLICE_LEN = 16
+	// the ignore tag when fake
+	FAKE_TAG_IGNORE     = "-"
+	FAKE_TAG_SLICE_SIZE = "fake_size"
 )
 
 var (
