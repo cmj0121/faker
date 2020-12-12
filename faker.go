@@ -92,6 +92,17 @@ func fake(value reflect.Value) (err error) {
 			str[idx] = byte(generator.Int63())
 		}
 		value.SetString(string(str))
+	case reflect.Struct:
+		for idx := 0; idx < value.NumField(); idx++ {
+			if field := value.Field(idx); field.IsValid() && field.CanSet() {
+				// the field now is valid and can set
+				// set by each field
+				if err = fake(field); err != nil {
+					// cannot set field on structure
+					return
+				}
+			}
+		}
 	default:
 		err = fmt.Errorf("cannot set fake for reflect.Kind: %v", kind)
 		return

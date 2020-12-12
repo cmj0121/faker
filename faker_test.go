@@ -6,6 +6,15 @@ import (
 	"testing"
 )
 
+type Foo struct {
+	ignore bool
+
+	Toggle bool
+	Count  int8
+	Buff   []rune
+	Name   string
+}
+
 /* ---- general type ---- */
 func TestFakerBool(t *testing.T) {
 	var x bool
@@ -246,6 +255,94 @@ func TestFakerString(t *testing.T) {
 		"xQN\xf8D;\xb2\xa8Y",
 		"_\xc3\xccj\xf2mZ",
 		" \x92o\x04k\xaaf쑥",
+	}
+
+	Seed(0)
+	for _, ans := range x_answers {
+		if err := Fake(&x); err != nil {
+			t.Fatalf("cannot set faker to %T: %v", x, err)
+		} else if !reflect.DeepEqual(x, ans) {
+			t.Fatalf("fake %#v <> %#v", x, ans)
+		}
+	}
+}
+
+func TestFakeStruct(t *testing.T) {
+	var x Foo
+	x_answers := []Foo{
+		{
+			ignore: false,
+			Toggle: false,
+			Count:  -64,
+			Buff: []rune{
+				-387013278,
+				1963666762,
+				-1633204049,
+			},
+			Name: "xQN\xf8D;\xb2\xa8Y",
+		},
+		{
+			ignore: false,
+			Toggle: false,
+			Count:  95,
+			Buff: []rune{
+				-1365029172,
+				1464508266,
+				1403442418,
+			},
+			Name: "Z\xaa \x92o\x04k\xaaf쑥\xa2",
+		},
+		{
+			ignore: false,
+			Toggle: false,
+			Count:  67,
+			Buff: []rune{
+				1258210498,
+				-1650781734,
+				601334336,
+			},
+			Name: "\xfe\xd6\x1e\xc1\\\xf7\x93\xed\x10:",
+		},
+		{
+			ignore: false,
+			Toggle: false,
+			Count:  -64,
+			Buff: []rune{
+				622675078,
+				1267322266,
+				-1768035344,
+				-1102168983,
+				1803868599,
+				-631472459,
+				383160680,
+				1630844983,
+				-1895813982,
+				-464882862,
+				-2090873478,
+				-1251534800,
+			},
+			Name: "w\xe5",
+		},
+		{
+			ignore: false,
+			Toggle: true,
+			Count:  77,
+			Buff: []rune{
+				-644367117,
+				-2098795211,
+				-82730767,
+				9496571,
+				58169065,
+				2134930079,
+				383160680,
+				1630844983,
+				-1895813982,
+				-464882862,
+				-2090873478,
+				-1251534800,
+			},
+			Name: ">Q\u007f\x12\xe9\x03\xd3\b\xde\xca!X\xad",
+		},
 	}
 
 	Seed(0)
