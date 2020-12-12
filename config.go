@@ -14,8 +14,15 @@ const (
 	// the default slice max size
 	FAKE_MAX_SLICE_LEN = 16
 	// the ignore tag when fake
-	FAKE_TAG_IGNORE     = "-"
+	FAKE_TAG_IGNORE = "-"
+
+	// the customized tag
+	// the fixed-length slice or string
 	FAKE_TAG_SLICE_SIZE = "fake_size"
+	// the fixed-choice string
+	FAKE_TAG_STR_ENUM = "fake_enum"
+	FAKE_VALUE_NAME   = "name"
+	FAKE_VALUE_DOMAIN = "domain"
 )
 
 var (

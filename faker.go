@@ -38,11 +38,11 @@ func Fake(in interface{}) (err error) {
 		return
 	}
 
-	err = fake(value.Elem(), 0)
+	err = fake(value.Elem(), 0, nil)
 	return
 }
 
-func fake(value reflect.Value, size int) (err error) {
+func fake(value reflect.Value, size int, pool []string) (err error) {
 	switch kind := value.Kind(); kind {
 	case reflect.Bool:
 		// set the random boolean value
@@ -62,7 +62,7 @@ func fake(value reflect.Value, size int) (err error) {
 		value.SetComplex(c)
 	case reflect.Array:
 		for idx := 0; idx < value.Cap(); idx++ {
-			if err = fake(value.Index(idx), 0); err != nil {
+			if err = fake(value.Index(idx), 0, nil); err != nil {
 				err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 				return
 			}
@@ -77,13 +77,13 @@ func fake(value reflect.Value, size int) (err error) {
 		for idx := 0; idx < length; idx++ {
 			switch {
 			case idx < value.Len():
-				if err = fake(value.Index(idx), 0); err != nil {
+				if err = fake(value.Index(idx), 0, nil); err != nil {
 					err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 					return
 				}
 			default:
 				val := reflect.New(value.Type().Elem())
-				if err = fake(val.Elem(), 0); err != nil {
+				if err = fake(val.Elem(), 0, nil); err != nil {
 					err = fmt.Errorf("cannot set new instance %v: %v", val.Type(), err)
 					return
 				}
@@ -91,24 +91,31 @@ func fake(value reflect.Value, size int) (err error) {
 			}
 		}
 	case reflect.String:
-		length := int(generator.Int63() % FAKE_MAX_SLICE_LEN)
-		if size > 0 {
-			// override the length
-			length = size
-		}
-		str := make([]byte, length)
+		switch {
+		case pool == nil:
+			length := int(generator.Int63() % FAKE_MAX_SLICE_LEN)
+			if size > 0 {
+				// override the length
+				length = size
+			}
+			str := make([]byte, length)
 
-		for idx := 0; idx < length; idx++ {
-			// save the data to the string
-			str[idx] = byte(generator.Int63())
+			for idx := 0; idx < length; idx++ {
+				// save the data to the string
+				str[idx] = byte(generator.Int63())
+			}
+			value.SetString(string(str))
+		default:
+			str := pool[generator.Int63()%int64(len(pool))]
+			value.SetString(string(str))
 		}
-		value.SetString(string(str))
 	case reflect.Struct:
 		for idx := 0; idx < value.NumField(); idx++ {
 			if field := value.Field(idx); field.IsValid() && field.CanSet() {
 				// the field now is valid and can set
 				tags := value.Type().Field(idx).Tag
 				size = 0
+				var pool []string
 
 				if strings.TrimSpace(string(tags)) == FAKE_TAG_IGNORE {
 					// ignore the tag
@@ -123,8 +130,15 @@ func fake(value reflect.Value, size int) (err error) {
 					}
 				}
 
+				switch tags.Get(FAKE_TAG_STR_ENUM) {
+				case FAKE_VALUE_NAME:
+					pool = FAKE_NAME_POOL
+				case FAKE_VALUE_DOMAIN:
+					pool = FAKE_DOMAIN_POOL
+				}
+
 				// set by each field
-				if err = fake(field, size); err != nil {
+				if err = fake(field, size, pool); err != nil {
 					// cannot set field on structure
 					return
 				}
