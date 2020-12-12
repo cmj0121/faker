@@ -1,5 +1,15 @@
 package faker
 
+// program meta
+const (
+	// program name
+	PROJ_NAME = "faker"
+	// version info
+	MAJOR = 0
+	MINOR = 2
+	MACRO = 0
+)
+
 const (
 	FAKE_DEFAULT_LEN = 16
 )
