@@ -14,7 +14,9 @@ type Foo struct {
 	Count  int8
 	Buff   []rune
 	FixBuf []uint8 `fake_size:"4"`
-	Name   string
+	Name   string  `fake_enum:"name"`
+	Domain string  `fake_enum:"domain"`
+	EMail  string  `fake_enum:"email"`
 }
 
 /* ---- general type ---- */
@@ -291,25 +293,36 @@ func TestFakeStruct(t *testing.T) {
 				0x4e,
 				0xf8,
 			},
-			Name: ";\xb2\xa8Y",
+			Name:   "john",
+			Domain: "vermögensberatung",
+			EMail:  "きんだいち@com.tw",
 		},
 		{
 			ignore: false,
 			Ignore: true,
 			Toggle: false,
-			Count:  95,
+			Count:  -52,
 			Buff: []rune{
-				-1365029172,
-				1464508266,
 				1403442418,
+				1637296493,
+				-1011964326,
+				-1400774486,
+				1825435424,
+				2069913234,
+				-841116049,
+				4152324,
+				1366085227,
+				-537998678,
 			},
 			FixBuf: []uint8{
-				0x5a,
-				0xaa,
-				0x20,
-				0x92,
+				0xec,
+				0x91,
+				0xa5,
+				0xa2,
 			},
-			Name: "\x04k\xaaf쑥\xa2yC#\xc2\xda@Z",
+			Name:   "john",
+			Domain: "vermögensberatung",
+			EMail:  "cindy+64@example",
 		},
 		{
 			ignore: false,
@@ -338,65 +351,9 @@ func TestFakeStruct(t *testing.T) {
 				0x37,
 				0xa2,
 			},
-			Name: "z0",
-		},
-		{
-			ignore: false,
-			Ignore: true,
-			Toggle: true,
-			Count:  119,
-			Buff: []rune{
-				-1141436326,
-				658332749,
-				1647500230,
-				-644367117,
-				-2098795211,
-				-1001655280,
-				-2113532614,
-				1091696727,
-				-1048164928,
-				1434487596,
-				622675078,
-				1267322266,
-				-1768035344,
-				-1102168983,
-			},
-			FixBuf: []uint8{
-				0xfb,
-				0xe9,
-				0x9f,
-				0xfd,
-			},
-			Name: "Q\u007f\x12\xe9\x03\xd3\b\xde\xca!X\xad2\xe1",
-		},
-		{
-			ignore: false,
-			Ignore: true,
-			Toggle: false,
-			Count:  -46,
-			Buff: []rune{
-				932970838,
-				-821465838,
-				-2009609764,
-				-644367117,
-				-2098795211,
-				-1001655280,
-				-2113532614,
-				1091696727,
-				-1048164928,
-				1434487596,
-				622675078,
-				1267322266,
-				-1768035344,
-				-1102168983,
-			},
-			FixBuf: []uint8{
-				0x46,
-				0x28,
-				0x85,
-				0x73,
-			},
-			Name: "",
+			Name:   "john",
+			Domain: "example",
+			EMail:  "john+229@XN--VERMGENSBERATUNG-PWB",
 		},
 	}
 

@@ -23,15 +23,23 @@ const (
 	FAKE_TAG_STR_ENUM = "fake_enum"
 	FAKE_VALUE_NAME   = "name"
 	FAKE_VALUE_DOMAIN = "domain"
+	FAKE_VALUE_EMAIL  = "email"
+)
+
+const (
+	FLAG_IGNORE = iota
+	FLAG_NAME
+	FLAG_DOMAIN
+	FLAG_EMAIL
 )
 
 var (
-	FAKE_NAME_POOL = []string{
+	FAKE_NAME_LISTS = []string{
 		"john",
 		"cindy",
 		"きんだいち",
 	}
-	FAKE_DOMAIN_POOL = []string{
+	FAKE_DOMAIN_LISTS = []string{
 		"com",
 		"com.tw",
 		"example",
@@ -41,5 +49,11 @@ var (
 		"テスト",
 		// https://jasontucker.blog/8945/what-is-the-longest-tld-you-can-get-for-a-domain-name
 		"XN--VERMGENSBERATUNG-PWB",
+	}
+
+	FAKE_EMAIL_LISTS = []string{
+		"%[1]v@%[2]v",
+		"%[1]v+%[3]d@%[2]v",
+		"%[1]v+%[3]d@%[4]d.%[2]v",
 	}
 )

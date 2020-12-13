@@ -6,11 +6,14 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/cmj0121/logger"
 )
 
 var (
 	// global lock for the faker which may pass the same instance
-	fake_lock = sync.Mutex{}
+	fake_lock   = sync.Mutex{}
+	fake_logger = logger.New(PROJ_NAME)
 )
 
 // run must- prefix and raise panic when error happened
@@ -38,11 +41,11 @@ func Fake(in interface{}) (err error) {
 		return
 	}
 
-	err = fake(value.Elem(), 0, nil)
+	err = fake(value.Elem(), 0, FLAG_IGNORE)
 	return
 }
 
-func fake(value reflect.Value, size int, pool []string) (err error) {
+func fake(value reflect.Value, size, flag int) (err error) {
 	switch kind := value.Kind(); kind {
 	case reflect.Bool:
 		// set the random boolean value
@@ -62,7 +65,7 @@ func fake(value reflect.Value, size int, pool []string) (err error) {
 		value.SetComplex(c)
 	case reflect.Array:
 		for idx := 0; idx < value.Cap(); idx++ {
-			if err = fake(value.Index(idx), 0, nil); err != nil {
+			if err = fake(value.Index(idx), 0, FLAG_IGNORE); err != nil {
 				err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 				return
 			}
@@ -77,13 +80,13 @@ func fake(value reflect.Value, size int, pool []string) (err error) {
 		for idx := 0; idx < length; idx++ {
 			switch {
 			case idx < value.Len():
-				if err = fake(value.Index(idx), 0, nil); err != nil {
+				if err = fake(value.Index(idx), 0, FLAG_IGNORE); err != nil {
 					err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 					return
 				}
 			default:
 				val := reflect.New(value.Type().Elem())
-				if err = fake(val.Elem(), 0, nil); err != nil {
+				if err = fake(val.Elem(), 0, FLAG_IGNORE); err != nil {
 					err = fmt.Errorf("cannot set new instance %v: %v", val.Type(), err)
 					return
 				}
@@ -91,8 +94,8 @@ func fake(value reflect.Value, size int, pool []string) (err error) {
 			}
 		}
 	case reflect.String:
-		switch {
-		case pool == nil:
+		switch flag {
+		case FLAG_IGNORE:
 			length := int(generator.Int63() % FAKE_MAX_SLICE_LEN)
 			if size > 0 {
 				// override the length
@@ -105,20 +108,40 @@ func fake(value reflect.Value, size int, pool []string) (err error) {
 				str[idx] = byte(generator.Int63())
 			}
 			value.SetString(string(str))
-		default:
-			str := pool[generator.Int63()%int64(len(pool))]
+		case FLAG_NAME:
+			str := FAKE_NAME_LISTS[generator.Int63()%int64(len(FAKE_NAME_LISTS))]
 			value.SetString(string(str))
+		case FLAG_DOMAIN:
+			str := FAKE_DOMAIN_LISTS[generator.Int63()%int64(len(FAKE_DOMAIN_LISTS))]
+			value.SetString(string(str))
+		case FLAG_EMAIL:
+			// name + ID @ ID . DOMAIN
+			str := FAKE_EMAIL_LISTS[generator.Int63()%int64(len(FAKE_EMAIL_LISTS))]
+			str = fmt.Sprintf(
+				str,
+				FAKE_NAME_LISTS[generator.Int63()%int64(len(FAKE_NAME_LISTS))],
+				FAKE_DOMAIN_LISTS[generator.Int63()%int64(len(FAKE_DOMAIN_LISTS))],
+				generator.Int63()%256,
+				generator.Int63()%256,
+			)
+			value.SetString(string(str))
+		default:
+			fake_logger.Warn("not implement string flag: %d", flag)
+			err = fmt.Errorf("not implement string flag: %d", flag)
+			return
 		}
 	case reflect.Struct:
 		for idx := 0; idx < value.NumField(); idx++ {
 			if field := value.Field(idx); field.IsValid() && field.CanSet() {
+				ftype := value.Type().Field(idx)
 				// the field now is valid and can set
 				tags := value.Type().Field(idx).Tag
 				size = 0
-				var pool []string
+				fake_logger.Info("fake %v.%-12v %-8v `%v`", value.Type().Name(), ftype.Name, field.Kind(), tags)
 
 				if strings.TrimSpace(string(tags)) == FAKE_TAG_IGNORE {
 					// ignore the tag
+					fake_logger.Debug("skip the field %v.%v", value.Type().Name(), ftype.Name)
 					continue
 				}
 
@@ -132,13 +155,17 @@ func fake(value reflect.Value, size int, pool []string) (err error) {
 
 				switch tags.Get(FAKE_TAG_STR_ENUM) {
 				case FAKE_VALUE_NAME:
-					pool = FAKE_NAME_POOL
+					flag = FLAG_NAME
 				case FAKE_VALUE_DOMAIN:
-					pool = FAKE_DOMAIN_POOL
+					flag = FLAG_DOMAIN
+				case FAKE_VALUE_EMAIL:
+					flag = FLAG_EMAIL
+				default:
+					flag = FLAG_IGNORE
 				}
 
 				// set by each field
-				if err = fake(field, size, pool); err != nil {
+				if err = fake(field, size, flag); err != nil {
 					// cannot set field on structure
 					return
 				}
