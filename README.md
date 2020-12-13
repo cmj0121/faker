@@ -30,4 +30,15 @@ func main() {
 ## Random ##
 The random interface is provide the random data with specified `Seed`. By-default the faker will
 call the Seed twice when load a new Random which first-time pass the time.Now().UnixNano() and
-then pass the result for the Int63()
+then pass the result for the Int63(). Also, you can use the slower but more secure generator, like `CryptoRandom`
+to generate the random data, or define your random generator and call `SetGenerator` to replace the generator.
+
+## Tag ##
+You can define the pre-define tag in your struct which limited the data generated from the Faker
+
+| key       | value  | description                              |
+|-----------|--------|------------------------------------------|
+| -         |        | ignore the public field in the structure |
+| fake_size | INT    | the limited size of the fake data        |
+| fake_enum | name   | the limited fake name                    |
+|           | domain | the limited fake top domain              |
