@@ -10,9 +10,12 @@ type Simple struct {
 	Ignore []byte `-`
 	Count  int
 	Data   []byte `fake_size:"8"`
-	Name   string `fake_enum:"name"`
-	Domain string `fake_enum:"domain"`
-	Email  string `fake_enum:"email"`
+	Name   string `fake:"name"`
+	Domain string `fake:"domain"`
+	Email  string `fake:"email"`
+	Lower string `fake:"lower" fake_size:"4"`
+	Upper string `fake:"upper" fake_size:"12"`
+	Digit string `fake:"digit" fake_size:"2"`
 }
 
 func main() {

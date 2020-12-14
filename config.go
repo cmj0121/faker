@@ -20,17 +20,13 @@ const (
 	// the fixed-length slice or string
 	FAKE_TAG_SLICE_SIZE = "fake_size"
 	// the fixed-choice string
-	FAKE_TAG_STR_ENUM = "fake_enum"
+	FAKE_TAG_FLAG     = "fake"
 	FAKE_VALUE_NAME   = "name"
 	FAKE_VALUE_DOMAIN = "domain"
 	FAKE_VALUE_EMAIL  = "email"
-)
-
-const (
-	FLAG_IGNORE = iota
-	FLAG_NAME
-	FLAG_DOMAIN
-	FLAG_EMAIL
+	FAKE_VALUE_LOWER  = "lower"
+	FAKE_VALUE_UPPER  = "upper"
+	FAKE_VALUE_DIGIT  = "digit"
 )
 
 var (

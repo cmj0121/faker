@@ -14,9 +14,9 @@ type Foo struct {
 	Count  int8
 	Buff   []rune
 	FixBuf []uint8 `fake_size:"4"`
-	Name   string  `fake_enum:"name"`
-	Domain string  `fake_enum:"domain"`
-	EMail  string  `fake_enum:"email"`
+	Name   string  `fake:"name"`
+	Domain string  `fake:"domain"`
+	EMail  string  `fake:"email"`
 }
 
 /* ---- general type ---- */

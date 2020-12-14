@@ -40,6 +40,9 @@ You can define the pre-define tag in your struct which limited the data generate
 |-----------|--------|------------------------------------------|
 | -         |        | ignore the public field in the structure |
 | fake_size | INT    | the limited size of the fake data        |
-| fake_enum | name   | the limited fake name                    |
+| fake      | name   | the limited fake name                    |
 |           | domain | the limited fake top domain              |
 |           | email  | the random format fake email address     |
+|           | lower  | choices the lower-case [a-z]             |
+|           | upper  | choices the upper-case [A-Z]             |
+|           | digit  | choices the digits [0-9]                 |

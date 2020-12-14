@@ -41,11 +41,11 @@ func Fake(in interface{}) (err error) {
 		return
 	}
 
-	err = fake(value.Elem(), 0, FLAG_IGNORE)
+	err = fake(value.Elem(), 0, FAKE_TAG_IGNORE)
 	return
 }
 
-func fake(value reflect.Value, size, flag int) (err error) {
+func fake(value reflect.Value, size int, flag string) (err error) {
 	switch kind := value.Kind(); kind {
 	case reflect.Bool:
 		// set the random boolean value
@@ -65,7 +65,7 @@ func fake(value reflect.Value, size, flag int) (err error) {
 		value.SetComplex(c)
 	case reflect.Array:
 		for idx := 0; idx < value.Cap(); idx++ {
-			if err = fake(value.Index(idx), 0, FLAG_IGNORE); err != nil {
+			if err = fake(value.Index(idx), 0, FAKE_TAG_IGNORE); err != nil {
 				err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 				return
 			}
@@ -80,13 +80,13 @@ func fake(value reflect.Value, size, flag int) (err error) {
 		for idx := 0; idx < length; idx++ {
 			switch {
 			case idx < value.Len():
-				if err = fake(value.Index(idx), 0, FLAG_IGNORE); err != nil {
+				if err = fake(value.Index(idx), 0, FAKE_TAG_IGNORE); err != nil {
 					err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 					return
 				}
 			default:
 				val := reflect.New(value.Type().Elem())
-				if err = fake(val.Elem(), 0, FLAG_IGNORE); err != nil {
+				if err = fake(val.Elem(), 0, FAKE_TAG_IGNORE); err != nil {
 					err = fmt.Errorf("cannot set new instance %v: %v", val.Type(), err)
 					return
 				}
@@ -95,7 +95,7 @@ func fake(value reflect.Value, size, flag int) (err error) {
 		}
 	case reflect.String:
 		switch flag {
-		case FLAG_IGNORE:
+		case FAKE_TAG_IGNORE, "":
 			length := int(generator.Int63() % FAKE_MAX_SLICE_LEN)
 			if size > 0 {
 				// override the length
@@ -108,13 +108,52 @@ func fake(value reflect.Value, size, flag int) (err error) {
 				str[idx] = byte(generator.Int63())
 			}
 			value.SetString(string(str))
-		case FLAG_NAME:
+		case FAKE_VALUE_LOWER:
+			length := int(generator.Int63() % FAKE_MAX_SLICE_LEN)
+			if size > 0 {
+				// override the length
+				length = size
+			}
+			str := make([]byte, length)
+
+			for idx := 0; idx < length; idx++ {
+				// save the data to the string
+				str[idx] = byte(generator.Int63() % 26 + 0x61)
+			}
+			value.SetString(string(str))
+		case FAKE_VALUE_UPPER:
+			length := int(generator.Int63() % FAKE_MAX_SLICE_LEN)
+			if size > 0 {
+				// override the length
+				length = size
+			}
+			str := make([]byte, length)
+
+			for idx := 0; idx < length; idx++ {
+				// save the data to the string
+				str[idx] = byte(generator.Int63() % 26 + 0x41)
+			}
+			value.SetString(string(str))
+		case FAKE_VALUE_DIGIT:
+			length := int(generator.Int63() % FAKE_MAX_SLICE_LEN)
+			if size > 0 {
+				// override the length
+				length = size
+			}
+			str := make([]byte, length)
+
+			for idx := 0; idx < length; idx++ {
+				// save the data to the string
+				str[idx] = byte(generator.Int63() % 10 + 0x30)
+			}
+			value.SetString(string(str))
+		case FAKE_VALUE_NAME:
 			str := FAKE_NAME_LISTS[generator.Int63()%int64(len(FAKE_NAME_LISTS))]
 			value.SetString(string(str))
-		case FLAG_DOMAIN:
+		case FAKE_VALUE_DOMAIN:
 			str := FAKE_DOMAIN_LISTS[generator.Int63()%int64(len(FAKE_DOMAIN_LISTS))]
 			value.SetString(string(str))
-		case FLAG_EMAIL:
+		case FAKE_VALUE_EMAIL:
 			// name + ID @ ID . DOMAIN
 			str := FAKE_EMAIL_LISTS[generator.Int63()%int64(len(FAKE_EMAIL_LISTS))]
 			str = fmt.Sprintf(
@@ -126,8 +165,8 @@ func fake(value reflect.Value, size, flag int) (err error) {
 			)
 			value.SetString(string(str))
 		default:
-			fake_logger.Warn("not implement string flag: %d", flag)
-			err = fmt.Errorf("not implement string flag: %d", flag)
+			fake_logger.Warn("not implement flag: %v", flag)
+			err = fmt.Errorf("not implement flag: %v", flag)
 			return
 		}
 	case reflect.Struct:
@@ -153,17 +192,7 @@ func fake(value reflect.Value, size, flag int) (err error) {
 					}
 				}
 
-				switch tags.Get(FAKE_TAG_STR_ENUM) {
-				case FAKE_VALUE_NAME:
-					flag = FLAG_NAME
-				case FAKE_VALUE_DOMAIN:
-					flag = FLAG_DOMAIN
-				case FAKE_VALUE_EMAIL:
-					flag = FLAG_EMAIL
-				default:
-					flag = FLAG_IGNORE
-				}
-
+				flag = tags.Get(FAKE_TAG_FLAG)
 				// set by each field
 				if err = fake(field, size, flag); err != nil {
 					// cannot set field on structure
