@@ -52,10 +52,28 @@ func fake(value reflect.Value, size int, flag string) (err error) {
 		value.SetBool(generator.Int63()%2 == 0)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		// set the random int64 (may truncated)
-		value.SetInt(generator.Int63())
+		switch flag {
+		case FAKE_VALUE_LOWER:
+			value.SetInt(generator.Int63()%26 + 0x61)
+		case FAKE_VALUE_UPPER:
+			value.SetInt(generator.Int63()%26 + 0x41)
+		case FAKE_VALUE_DIGIT:
+			value.SetInt(generator.Int63()%10 + 0x30)
+		default:
+			value.SetInt(generator.Int63())
+		}
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		// set the random uint64 (may truncated)
-		value.SetUint(uint64(generator.Int63()))
+		switch flag {
+		case FAKE_VALUE_LOWER:
+			value.SetUint(uint64(generator.Int63()%26 + 0x61))
+		case FAKE_VALUE_UPPER:
+			value.SetUint(uint64(generator.Int63()%26 + 0x41))
+		case FAKE_VALUE_DIGIT:
+			value.SetUint(uint64(generator.Int63()%10 + 0x30))
+		default:
+			value.SetUint(uint64(generator.Int63()))
+		}
 	case reflect.Float64, reflect.Float32:
 		// set the random float64 (may truncated)
 		value.SetFloat(generator.Float64())
@@ -65,7 +83,7 @@ func fake(value reflect.Value, size int, flag string) (err error) {
 		value.SetComplex(c)
 	case reflect.Array:
 		for idx := 0; idx < value.Cap(); idx++ {
-			if err = fake(value.Index(idx), 0, FAKE_TAG_IGNORE); err != nil {
+			if err = fake(value.Index(idx), 0, flag); err != nil {
 				err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 				return
 			}
@@ -80,13 +98,13 @@ func fake(value reflect.Value, size int, flag string) (err error) {
 		for idx := 0; idx < length; idx++ {
 			switch {
 			case idx < value.Len():
-				if err = fake(value.Index(idx), 0, FAKE_TAG_IGNORE); err != nil {
+				if err = fake(value.Index(idx), 0, flag); err != nil {
 					err = fmt.Errorf("cannot set #%d on %v: %v", idx, value, err)
 					return
 				}
 			default:
 				val := reflect.New(value.Type().Elem())
-				if err = fake(val.Elem(), 0, FAKE_TAG_IGNORE); err != nil {
+				if err = fake(val.Elem(), 0, flag); err != nil {
 					err = fmt.Errorf("cannot set new instance %v: %v", val.Type(), err)
 					return
 				}
@@ -118,7 +136,7 @@ func fake(value reflect.Value, size int, flag string) (err error) {
 
 			for idx := 0; idx < length; idx++ {
 				// save the data to the string
-				str[idx] = byte(generator.Int63() % 26 + 0x61)
+				str[idx] = byte(generator.Int63()%26 + 0x61)
 			}
 			value.SetString(string(str))
 		case FAKE_VALUE_UPPER:
@@ -131,7 +149,7 @@ func fake(value reflect.Value, size int, flag string) (err error) {
 
 			for idx := 0; idx < length; idx++ {
 				// save the data to the string
-				str[idx] = byte(generator.Int63() % 26 + 0x41)
+				str[idx] = byte(generator.Int63()%26 + 0x41)
 			}
 			value.SetString(string(str))
 		case FAKE_VALUE_DIGIT:
@@ -144,7 +162,7 @@ func fake(value reflect.Value, size int, flag string) (err error) {
 
 			for idx := 0; idx < length; idx++ {
 				// save the data to the string
-				str[idx] = byte(generator.Int63() % 10 + 0x30)
+				str[idx] = byte(generator.Int63()%10 + 0x30)
 			}
 			value.SetString(string(str))
 		case FAKE_VALUE_NAME:
