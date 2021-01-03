@@ -85,6 +85,35 @@ type SwaggerV2 struct {
 	Host     string
 	BasePath string
 	Schemes  []string
+
+	Paths map[string]map[string]struct {
+		Summary     string
+		Description string
+		// Consumes, Produces
+		Consumes   []string
+		Produces   []string
+		Parameters []struct {
+			In          string
+			Name        string
+			Required    bool
+			Type        string
+			Description string
+		}
+		Responses map[string]struct {
+			Description string
+			Schema      struct {
+				Type       string
+				Properties map[string]struct {
+					Type    string
+					Example interface{}
+				}
+				Items []struct {
+					Type    string
+					Example interface{}
+				}
+			}
+		}
+	}
 }
 
 // the swagger data (v3)
@@ -99,6 +128,40 @@ type SwaggerV3 struct {
 	Servers []struct {
 		URL         string
 		Description string
+	}
+
+	Paths map[string]map[string]struct {
+		Summary     string
+		Description string
+		// Consumes, Produces
+		Consumes   []string
+		Produces   []string
+		Parameters []struct {
+			In          string
+			Name        string
+			Required    bool
+			Description string
+			Schema      struct {
+				Type   string
+				Format string
+			}
+		}
+		Responses map[string]struct {
+			Description string
+			Content     map[string]struct {
+				Schema struct {
+					Type       string
+					Properties map[string]struct {
+						Type    string
+						Example interface{}
+					}
+					Items []struct {
+						Type    string
+						Example interface{}
+					}
+				}
+			}
+		}
 	}
 }
 
