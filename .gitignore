@@ -2,3 +2,8 @@
 
 examples/*
 !examples/*.go
+
+cmd/*
+!cmd/*.go
+
+.benchmark

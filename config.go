@@ -1,5 +1,9 @@
 package faker
 
+import (
+	"fmt"
+)
+
 // program meta
 const (
 	// program name
@@ -53,3 +57,8 @@ var (
 		"%[1]v+%[3]d@%[4]d.%[2]v",
 	}
 )
+
+func Version() (ver string) {
+	ver = fmt.Sprintf("%s/v%d.%d.%d", PROJ_NAME, MAJOR, MINOR, MACRO)
+	return
+}
